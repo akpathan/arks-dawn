@@ -1,0 +1,78 @@
+<div class="custom-menu">
+  <ul class="custom-menu-parent-ul">
+    {% for link in linklists['category-menu'].links %}
+      <li class="custom-menu-parent-ul-link">
+        <a href="{{ link.url }}">
+          {{ link.title }}
+          {% if link.links != blank %}
+            <span class="menuarrow">{% render 'caret-icon' %}</span>
+          {% endif %}
+        </a>
+        {% if link.links != blank %}
+          <ul class="dropdown">
+            {% for childlink in link.links %}
+              <li class="custom-menu-child-ul-link">
+                <a href="{{ childlink.url }}">{{ childlink.title }}</a>
+              </li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+</div>
+
+<style>
+  .custom-menu ul {
+    margin: 0 0 2rem 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+  }
+  .custom-menu ul li {
+    background: #f3f9fb;
+    padding: 0.6rem 1.5rem;
+    border-radius: 3rem;
+  }
+  .custom-menu a {
+    text-decoration: none;
+    color: #000;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .category-menu .page-width {
+    padding: 0px 12rem;
+  }
+  .custom-menu ul.dropdown {
+    opacity: 0;
+    position: absolute;
+    min-width: 300px;
+    background: #ccc;
+    margin-top: 0.3rem;
+  }
+  .custom-menu li:hover .dropdown {
+    opacity: 1;
+    z-index: 99;
+    display: block;
+    transition: all 999ms;
+  }
+  .custom-menu ul.dropdown li {
+    border-radius: 0.2rem;
+    margin: 10px;
+  }
+  span.menuarrow {
+    display: flex;
+    align-items: center;
+  }
+  .custom-menu > ul > li:first-child {
+    background: #000;
+  }
+  .custom-menu > ul > li:first-child > a {
+    color: #fff;
+  }
+  .custom-menu > ul > li:first-child > a .menuarrow svg path {
+    stroke: #fff;
+  }
+</style>

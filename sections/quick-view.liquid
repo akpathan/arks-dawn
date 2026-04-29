@@ -1,0 +1,328 @@
+<script id="product-data" type="application/json">
+  {{ product.variants | json }}
+</script>
+
+<div class="quick-view-content">
+  <button class="close-modal" type="button">&times;</button>
+
+  <div class="quick-view-inner">
+    <div class="quick-view-image">
+      <img
+        id="qv-image"
+        src="{{ product.featured_image | image_url: width: 600 }}"
+        alt="{{ product.title | escape }}"
+        loading="lazy"
+      >
+      <div>
+        <h2 id="qv-title">{{ product.title }}</h2>
+        <p id="qv-price">{{ product.price | money_with_currency }}</p>
+        <div id="qv-description">{{ product.description }}</div>
+      </div>
+    </div>
+
+    <div class="quick-view-info">
+      <form id="qv-form" novalidate>
+        {% unless product.has_only_default_variant %}
+          <variant-picker class="variants-container">
+            {% for option in product.options_with_values %}
+              {% if option.name == 'Color' %}
+                <div class="variant-group vg-color">
+                  <label class="variant-label">Color</label>
+                  <div class="segmented-control">
+                    {% for value in option.values %}
+                      <button
+                        type="button"
+                        class="variant-btn segment{% if forloop.first %} active{% endif %}"
+                        data-option="option{{ option.position }}"
+                        data-value="{{ value }}"
+                      >
+                        <span class="color-dot" style="background-color: {{ value | downcase }};"></span>
+                        {{ value }}
+                      </button>
+                    {% endfor %}
+                  </div>
+                </div>
+              {% endif %}
+
+              {% if option.name == 'Size' %}
+                <div class="variant-group vg-size">
+                  <label class="variant-label">Size</label>
+                  <div class="custom-select-wrapper" data-option="option{{ option.position }}">
+                    <div class="custom-select-trigger" role="button" tabindex="0">
+                      <span class="custom-select-label">Choose your size</span>
+                      <span class="custom-select-arrow">
+                        <svg width="14" height="8" viewBox="0 0 14 8" fill="none">
+                          <path d="M1 1L7 7L13 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        </svg>
+                      </span>
+                    </div>
+                    <div class="custom-select-dropdown" role="listbox">
+                      {% for value in option.values %}
+                        <div
+                          class="custom-select-option"
+                          role="option"
+                          data-option="option{{ option.position }}"
+                          data-value="{{ value }}"
+                        >
+                          {{ value }}
+                        </div>
+                      {% endfor %}
+                    </div>
+                  </div>
+                </div>
+              {% endif %}
+            {% endfor %}
+          </variant-picker>
+        {% endunless %}
+
+        <input type="hidden" name="id" id="selected-variant-id" value="">
+
+        <button type="submit" class="add-to-cart">
+          <span class="atc-text">ADD TO CART</span>
+          <span class="atc-arrow">
+            {{ 'icon-arrow-right.svg' | inline_asset_content }}
+          </span>
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,100..900;1,100..900&family=Lustria&display=swap');
+
+  /* .quick-view-content {
+        position: relative;
+        background: #fff;
+        padding: 32px;
+        max-width: 640px;
+        width: 100%;
+        margin: 0 auto;
+      } */
+
+  .close-modal {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    line-height: 1;
+    color: #000;
+  }
+
+  .quick-view-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .quick-view-image {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.8rem;
+  }
+
+  .quick-view-image img {
+    width: 120px;
+    height: 140px;
+    display: block;
+    object-fit: cover;
+  }
+
+  #qv-title {
+    font-family: 'Jost', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 300;
+    margin: 0 0 10px;
+    line-height: 1;
+  }
+
+  #qv-price {
+    font-family: 'Lustria', sans-serif;
+    font-size: 1.6rem;
+    font-weight: normal;
+    margin: 0 0 12px;
+    color: #000;
+    line-height: 1;
+  }
+
+  #qv-description {
+    font-family: 'Jost', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 300;
+    color: #000;
+    line-height: 1;
+  }
+  #qv-description p {
+    margin: 0;
+  }
+
+  .variants-container {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .vg-color {
+    order: -1;
+  }
+
+  /* Variant groups */
+  .variant-group {
+    margin-bottom: 1.1rem;
+  }
+  .variant-group.vg-size {
+    margin: 0;
+  }
+
+  .variant-label {
+    display: block;
+    font-size: 14px;
+    font-weight: normal;
+    margin-bottom: 6px;
+    color: #333333;
+    line-height: 1;
+  }
+
+  /* Color segmented */
+  .segmented-control {
+    display: flex;
+  }
+  .segmented-control button:first-child {
+    border-right: 0;
+  }
+
+  .segment {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    padding: 1.2rem 1.5rem 1.2rem 1.5rem;
+    border: 1px solid #000;
+    outline: 0;
+    position: relative;
+    max-height: 40px;
+    height: 100%;
+    background: transparent;
+    font-size: 1.8rem;
+    line-height: 1;
+  }
+
+  .segment.active {
+    background: #000;
+    color: #fff;
+  }
+
+  .color-dot {
+    width: 6px;
+    height: 100%;
+    border-right: 1px solid #000;
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+
+  /* Custom size select */
+  .custom-select-wrapper {
+    position: relative;
+    user-select: none;
+  }
+
+  .custom-select-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 13px;
+    border: 1px solid #000;
+    background: #fff;
+    cursor: pointer;
+    font-size: 16px;
+    color: #000;
+  }
+
+  .custom-select-arrow {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 0 0.8rem;
+    transition: transform 0.2s;
+  }
+  .custom-select-arrow::before {
+    content: '';
+    height: 50px;
+    width: 1px;
+    background: #000;
+    position: absolute;
+    top: -21px;
+    left: -15px;
+    display: block;
+  }
+
+  .custom-select-wrapper.open .custom-select-arrow svg {
+    transform: rotate(180deg);
+  }
+
+  .custom-select-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 1px);
+    left: 0;
+    right: 0;
+    border: 1px solid #000;
+    background: #fff;
+    z-index: 9999;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .custom-select-wrapper.open .custom-select-dropdown {
+    display: block;
+  }
+
+  .custom-select-option {
+    padding: 12px 16px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.1s;
+    background: white;
+    text-align: center;
+    color: black;
+    font-size: 16px;
+    font-family: 'Jost', sans-serif;
+    font-weight: normal;
+  }
+
+  .custom-select-option:last-child {
+    border-bottom: none;
+  }
+  .custom-select-option:hover {
+    background: #f5f5f5;
+  }
+  .custom-select-option.selected {
+    background: #000;
+    color: #fff;
+  }
+
+  /* Add to cart */
+  .add-to-cart {
+    background: #000;
+    color: #fff;
+    padding: 12px 20px;
+    border: none;
+    cursor: pointer;
+    margin-top: 5.1rem;
+    width: 100%;
+  }
+
+  .add-to-cart:hover {
+    opacity: 0.85;
+  }
+  .add-to-cart:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .atc-arrow {
+    margin-left: 2rem;
+  }
+</style>
