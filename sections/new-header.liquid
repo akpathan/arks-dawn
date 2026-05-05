@@ -1,0 +1,285 @@
+{{ 'new-header.css' | asset_url | stylesheet_tag }}
+
+<header class="page-width custom-header-main {% if section.settings.sticky_header %}is-sticky{% endif %}">
+  <!-- MOBILE HAMBURGER -->
+  <button class="cs-hamburger" aria-label="Open menu">☰</button>
+
+  <!-- LEFT: NAVIGATION (DESKTOP) -->
+  <nav class="cs-links">
+    {% if section.settings.main_menu != blank %}
+      <ul class="cs-menu">
+        {% for link in linklists[section.settings.main_menu].links %}
+          {% assign matched_block = null %}
+
+          {% for block in section.blocks %}
+            {% if block.type == 'mega_menu' and block.settings.menu_title == link.title %}
+              {% assign matched_block = block %}
+            {% endif %}
+          {% endfor %}
+
+          <li class="cs-menu-item">
+            <a href="{{ link.url }}" class="cs-menu-link">
+              {{ link.title }}
+            </a>
+
+            {% if matched_block %}
+              {% assign collection = collections[matched_block.settings.collection] %}
+
+              {% if collection != blank %}
+                <div class="cs-mega-wrapper">
+                  <div class="cs-mega-inner page-width">
+                    {% for product in collection.products limit: 6 %}
+                      <div class="cs-mega-card">
+                        <a href="{{ product.url }}">
+                          <div class="cs-mega-image">
+                            {% if product.featured_image %}
+                              <img
+                                src="{{ product.featured_image | image_url: width: 400 }}"
+                                alt="{{ product.title }}"
+                                loading="lazy"
+                              >
+                            {% endif %}
+                          </div>
+
+                          <p class="cs-mega-title">
+                            {{ product.title }}
+                          </p>
+                        </a>
+                      </div>
+                    {% endfor %}
+                  </div>
+
+                  <div class="cs-mega-footer">
+                    <a href="{{ collection.url }}" class="cs-view-all"> VIEW ALL </a>
+                  </div>
+                </div>
+              {% endif %}
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </nav>
+
+  <!-- CENTER: LOGO -->
+  <div class="cs-logo">
+    <a href="{{ routes.root_url }}">
+      {% if section.settings.logo != blank %}
+        <img
+          src="{{ section.settings.logo | image_url: width: section.settings.logo_width }}"
+          width="{{ section.settings.logo_width }}"
+          alt="{{ shop.name }}"
+        >
+      {% else %}
+        <span>{{ shop.name }}</span>
+      {% endif %}
+    </a>
+  </div>
+
+  <!-- RIGHT: ICONS -->
+  <div class="cs-right-content">
+    {% if section.settings.enable_search %}
+      <a href="{{ routes.search_url }}" class="cs-icon">🔍</a>
+    {% endif %}
+
+    {% if section.settings.enable_account %}
+      <a href="{{ routes.account_url }}" class="cs-icon">👤</a>
+    {% endif %}
+
+    {% if section.settings.enable_cart %}
+      <a href="{{ routes.cart_url }}" class="cs-icon cs-cart">
+        🛒
+        {% if cart.item_count > 0 %}
+          <span class="cs-cart-count">{{ cart.item_count }}</span>
+        {% endif %}
+      </a>
+    {% endif %}
+  </div>
+</header>
+
+<!-- MOBILE DRAWER -->
+<div class="cs-drawer">
+  <div class="cs-drawer-header">
+    <button class="cs-close">✕</button>
+  </div>
+
+  <ul class="cs-drawer-menu">
+    {% for link in linklists[section.settings.main_menu].links %}
+      {% assign matched_block = null %}
+      {% for block in section.blocks %}
+        {% if block.type == 'mega_menu' and block.settings.menu_title == link.title %}
+          {% assign matched_block = block %}
+        {% endif %}
+      {% endfor %}
+
+      <li class="cs-drawer-item">
+        <div class="cs-drawer-link-wrapper">
+          <a href="{{ link.url }}">{{ link.title }}</a>
+
+          {% if matched_block %}
+            <button class="cs-drawer-toggle">+</button>
+          {% endif %}
+        </div>
+
+        {% if matched_block %}
+          {% assign collection = collections[matched_block.settings.collection] %}
+
+          {% if collection != blank %}
+            <div class="cs-drawer-dropdown">
+              <div class="cs-drawer-products">
+                {% for product in collection.products limit: 6 %}
+                  <a href="{{ product.url }}" class="cs-drawer-product">
+                    <div class="cs-drawer-image">
+                      {% if product.featured_image %}
+                        <img
+                          src="{{ product.featured_image | image_url: width: 300 }}"
+                          alt="{{ product.title }}"
+                          loading="lazy"
+                        >
+                      {% endif %}
+                    </div>
+
+                    <span>{{ product.title }}</span>
+                  </a>
+                {% endfor %}
+              </div>
+
+              <a href="{{ collection.url }}" class="cs-drawer-view-all"> VIEW ALL </a>
+            </div>
+          {% endif %}
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+</div>
+
+<div class="cs-overlay"></div>
+
+<script>
+  (function () {
+    function initDrawer() {
+      const hamburger = document.querySelector('.cs-hamburger');
+      const drawer = document.querySelector('.cs-drawer');
+      const overlay = document.querySelector('.cs-overlay');
+      const closeBtn = document.querySelector('.cs-close');
+      const toggles = document.querySelectorAll('.cs-drawer-toggle');
+
+      if (!hamburger || !drawer) return;
+
+      /* ===== OPEN DRAWER ===== */
+      hamburger.addEventListener('click', function () {
+        drawer.classList.add('active');
+        overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+      });
+
+      /* ===== CLOSE DRAWER ===== */
+      function closeDrawer() {
+        drawer.classList.remove('active');
+        overlay.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+
+      if (closeBtn) closeBtn.addEventListener('click', closeDrawer);
+      if (overlay) overlay.addEventListener('click', closeDrawer);
+
+      /* ===== ACCORDION DROPDOWN ===== */
+      toggles.forEach((button) => {
+        button.addEventListener('click', function (e) {
+          e.preventDefault();
+
+          const item = this.closest('.cs-drawer-item');
+
+          /* close others */
+          document.querySelectorAll('.cs-drawer-item').forEach((el) => {
+            if (el !== item) el.classList.remove('active');
+          });
+
+          item.classList.toggle('active');
+        });
+      });
+    }
+
+    /* Shopify safe init */
+    document.addEventListener('DOMContentLoaded', initDrawer);
+    document.addEventListener('shopify:section:load', initDrawer);
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Custom Header",
+  "tag": "section",
+  "class": "custom-header-section",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "logo",
+      "label": "Logo image"
+    },
+    {
+      "type": "range",
+      "id": "logo_width",
+      "label": "Logo width",
+      "min": 50,
+      "max": 300,
+      "step": 10,
+      "default": 120,
+      "unit": "px"
+    },
+    {
+      "type": "link_list",
+      "id": "main_menu",
+      "label": "Main menu"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_search",
+      "label": "Enable search",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_account",
+      "label": "Enable account icon",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_cart",
+      "label": "Enable cart icon",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "sticky_header",
+      "label": "Enable sticky header",
+      "default": true
+    }
+  ],
+  "blocks": [
+    {
+      "type": "mega_menu",
+      "name": "Mega Menu",
+      "settings": [
+        {
+          "type": "text",
+          "id": "menu_title",
+          "label": "Menu title (must match menu item exactly)"
+        },
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Select collection"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Custom Header",
+      "category": "Header"
+    }
+  ]
+}
+{% endschema %}
